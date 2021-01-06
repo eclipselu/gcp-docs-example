@@ -30,7 +30,8 @@ def index():
     bucket = request.headers.get('ce-subject')
 
     print(f"Detected change in GCS bucket: {bucket}")
-    return (f"Detected change in GCS bucket: {bucket}", 200)
+    # return (f"Detected change in GCS bucket: {bucket}", 200)
+    return ("", 200)
 # [END gcs_handler]
 
 

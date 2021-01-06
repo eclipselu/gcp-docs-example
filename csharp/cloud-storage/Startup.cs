@@ -54,7 +54,7 @@ public class Startup
                     return;
                 }
 
-                await context.Response.WriteAsync($"GCS CloudEvent type: {ceSubject}");
+                await context.Response.WriteAsync("");
             });
         });
     }

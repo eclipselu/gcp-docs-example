@@ -27,8 +27,9 @@ import (
 // HelloEventsStorage receives and processes a Pub/Sub message via a CloudEvent.
 func HelloEventsStorage(w http.ResponseWriter, r *http.Request) {
 	s := fmt.Sprintf("Detected change in GCS bucket: %s", string(r.Header.Get("Ce-Subject")))
-	log.Printf(s)
-	fmt.Fprintln(w, s)
+	fmt.Println(s)
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(""))
 }
 
 // [END gcs_handler]

@@ -27,7 +27,7 @@ app.post('/', (req, res) => {
   console.log(`Detected change in GCS bucket: ${req.header('ce-subject')}`);
   return res
     .status(200)
-    .send(`Detected change in GCS bucket: ${req.header('ce-subject')}`);
+    .send('');
 });
 
 module.exports = app;
