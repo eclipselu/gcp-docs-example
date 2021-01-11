@@ -14,9 +14,10 @@
 
 # [START gcs_server]
 import os
+import uuid
 
-from flask import Flask, request
-
+from flask import Flask, request, make_response
+from cloudevents.http import CloudEvent, from_http, to_structured
 
 app = Flask(__name__)
 # [END gcs_server]
@@ -27,13 +28,25 @@ app = Flask(__name__)
 def index():
     # Gets the GCS bucket name from the CloudEvent header
     # Example: "storage.googleapis.com/projects/_/buckets/my-bucket"
-    bucket = request.headers.get('ce-subject')
+    event = from_http(request.headers, request.get_data())
+    print(f"Detected change in GCS bucket: {event['subject']}")
 
-    print(f"Detected change in GCS bucket: {bucket}")
-    # return (f"Detected change in GCS bucket: {bucket}", 200)
-    return ("", 200)
+    attributes = {
+        "id": str(uuid.uuid4()),
+        "source": "https://localhost",
+        "specversion": "1.0",
+        "type": "com.example.kuberun.events.received",
+    }
+    data = {"message": "Hello World!"}
+    event = CloudEvent(attributes, data)
+    headers, body = to_structured(event)
+
+    response = make_response(body, 200)
+    response.headers.update(headers)
+    return response
+
+
 # [END gcs_handler]
-
 
 # [START gcs_server]
 if __name__ == "__main__":

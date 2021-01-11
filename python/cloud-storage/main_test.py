@@ -19,7 +19,6 @@ import pytest
 
 import main
 
-
 binary_headers = {
     "ce-id": str(uuid4),
     "ce-type": "com.pytest.sample.event",
