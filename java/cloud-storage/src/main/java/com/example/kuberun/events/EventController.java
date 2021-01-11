@@ -17,7 +17,6 @@
 package com.example.kuberun.events;
 
 // [START gcs_handler]
-import io.cloudevents.rw.CloudEventRWException;
 import java.net.URI;
 import java.util.UUID;
 
@@ -31,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.cloudevents.CloudEvent;
 import io.cloudevents.core.message.MessageReader;
 import io.cloudevents.http.HttpMessageFactory;
+import io.cloudevents.rw.CloudEventRWException;
 import io.cloudevents.spring.http.CloudEventHttpUtils;
 
 @RestController
