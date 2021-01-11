@@ -33,9 +33,9 @@ RUN mvn package -DskipTests
 FROM adoptopenjdk/openjdk11:alpine-slim
 
 # Copy the jar to the production image from the builder stage.
-COPY --from=builder /app/target/audit-storage-*.jar /audit-storage.jar
+COPY --from=builder /app/target/cloud-storage-*.jar /cloud-storage.jar
 
 # Run the web service on container startup.
-CMD ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/audit-storage.jar"]
+CMD ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/cloud-storage.jar"]
 
 # [END gcs_dockerfile]
