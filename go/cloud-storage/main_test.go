@@ -16,48 +16,44 @@ package main
 
 import (
 	"io/ioutil"
-	"log"
-	"net/http"
-	"net/http/httptest"
 	"os"
-	"strings"
 	"testing"
+
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
-func TestHelloEventsStorage(t *testing.T) {
+func TestReceive(t *testing.T) {
 	tests := []struct {
 		subject string
 		want    string
 	}{
-		{subject: "storage.googleapis.com/projects/_/buckets/my-bucket", want: "Detected change in GCS bucket: storage.googleapis.com/projects/_/buckets/my-bucket\n"},
+		{subject: "objects/go-test.txt", want: "Detected change in GCS bucket: objects/go-test.txt\n"},
 	}
 	for _, test := range tests {
+		old := os.Stdout // keep backup of the real stdout
 		r, w, _ := os.Pipe()
-		log.SetOutput(w)
-		defer log.SetOutput(os.Stderr)
+		os.Stdout = w
+		defer func() {
+			os.Stdout = old
+		}()
 
-		originalFlags := log.Flags()
-		defer log.SetFlags(originalFlags)
-		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
-
-		payload := strings.NewReader("{}")
-		req := httptest.NewRequest("POST", "/", payload)
-		req.Header.Set("ce-subject", test.subject)
-		rr := httptest.NewRecorder()
-		HelloEventsStorage(rr, req)
+		event := cloudevents.NewEvent()
+		event.SetID("test-id")
+		event.SetSpecVersion("1.0")
+		event.SetSource("https://localhost")
+		event.SetType("example.type")
+		event.SetSubject(test.subject)
+		event.SetData(cloudevents.ApplicationJSON, map[string]string{"hello": "world"})
+		Receive(event)
 
 		w.Close()
-
-		if code := rr.Result().StatusCode; code == http.StatusBadRequest {
-			t.Errorf("HelloEventsStorage(%q) invalid input, status code (%q)", test.subject, code)
-		}
 
 		out, err := ioutil.ReadAll(r)
 		if err != nil {
 			t.Fatalf("ReadAll: %v", err)
 		}
 		if got := string(out); got != test.want {
-			t.Errorf("HelloEventsStorage(%q): got %q, want %q", test.subject, got, test.want)
+			t.Errorf("Receive(%q): got %q, want %q", test.subject, got, test.want)
 		}
 	}
 }

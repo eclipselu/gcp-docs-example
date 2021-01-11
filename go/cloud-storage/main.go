@@ -14,39 +14,33 @@
 
 // [START gcs_handler]
 
-// Sample audit_storage is a Cloud Run service which handles Cloud Audit Log messages with Cloud Storage data.
+// Sample cloud-storage is a Cloud Run service which handles events from Cloud Storage
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
-	"net/http"
-	"os"
+
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
-// HelloEventsStorage receives and processes a Pub/Sub message via a CloudEvent.
-func HelloEventsStorage(w http.ResponseWriter, r *http.Request) {
-	s := fmt.Sprintf("Detected change in GCS bucket: %s", string(r.Header.Get("Ce-Subject")))
-	fmt.Println(s)
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(""))
+// Receive simply print the Ce-Subject header out
+func Receive(event cloudevents.Event) {
+	// do something with event.
+	fmt.Printf("Detected change in GCS bucket: %s\n", event.Subject())
 }
 
 // [END gcs_handler]
 // [START gcs_server]
 
 func main() {
-	http.HandleFunc("/", HelloEventsStorage)
-	// Determine port for HTTP service.
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
+	// The default client is HTTP.
+	c, err := cloudevents.NewDefaultClient()
+	if err != nil {
+		log.Fatalf("failed to create client, %v", err)
 	}
-	// Start HTTP server.
-	log.Printf("Listening on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		log.Fatal(err)
-	}
+	log.Fatal(c.StartReceiver(context.Background(), Receive))
 }
 
 // [END gcs_server]
