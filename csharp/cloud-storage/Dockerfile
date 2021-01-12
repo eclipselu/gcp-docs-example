@@ -39,5 +39,5 @@ WORKDIR /app
 COPY --from=build /app/out ./
 
 # Run the web service on container startup.
-ENTRYPOINT ["dotnet", "AuditStorage.dll"]
+ENTRYPOINT ["dotnet", "CloudStorage.dll"]
 # [END run_events_gcs_dockerfile]
