@@ -14,20 +14,35 @@
 
 // [START gcs_handler]
 const express = require('express');
+const { v4: uuidv4 } = require('uuid');
+const { HTTP, CloudEvent } = require('cloudevents');
+const { toStorageObjectData } = require('@google/events/cloud/storage/v1/StorageObjectData');
+
 const app = express();
 
 app.use(express.json());
 app.post('/', (req, res) => {
-  if (!req.header('ce-subject')) {
-    return res
-      .status(400)
-      .send('Bad Request: missing required header: ce-subject');
+  try {
+    const receivedEvent = HTTP.toEvent({ headers: req.headers, body: req.body });
+    const storageObjectData = toStorageObjectData(receivedEvent.data);
+    console.log(`Detected change in GCS bucket: ${storageObjectData.bucket}, object name: ${storageObjectData.name}`);
+  } catch (error) {
+    return res.status(400).send('Invalid cloudevent');
   }
 
-  console.log(`Detected change in GCS bucket: ${req.header('ce-subject')}`);
-  return res
-    .status(200)
-    .send('');
+  // reply with a cloudevent
+  const replyEvent = new CloudEvent({
+    id: uuidv4(),
+    type: 'com.example.kuberun.events.received',
+    source: 'https://localhost',
+    specversion: '1.0',
+  });
+  replyEvent.data = {
+    message: "Event received"
+  }
+
+  const message = HTTP.binary(replyEvent);
+  return res.header(message.headers).status(200).send(message.body);
 });
 
 module.exports = app;

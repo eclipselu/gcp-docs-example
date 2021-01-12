@@ -1,5 +1,5 @@
 {
-  "name": "cloud-run-events-gcs",
+  "name": "kuberun-events-gcs",
   "version": "1.0.0",
   "private": true,
   "description": "Simple GCS subscriber service sample",
@@ -19,7 +19,10 @@
     "system-test": "test/runner.sh mocha test/system.test.js --timeout=10000"
   },
   "dependencies": {
-    "express": "^4.16.4"
+    "@google/events": "^3.2.1",
+    "cloudevents": "^4.0.0",
+    "express": "^4.16.4",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "got": "^11.5.0",

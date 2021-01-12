@@ -32,8 +32,13 @@ describe('Unit Tests', () => {
   });
 
   describe('should fail', () => {
-    it('on a Bad Request with an empty payload', async () => {
-      await request.post('/').type('json').send('').expect(400);
+    it('on a Bad Request missing ce-id', async () => {
+      await request
+        .post('/')
+        .type('json')
+        .set('ce-type', 'test-type')
+        .send('')
+        .expect(400);
     });
   });
 
@@ -50,13 +55,17 @@ describe('Unit Tests', () => {
     it('with a minimally valid GCS event', async () => {
       await request
         .post('/')
-        .set('ce-subject', 'test-subject')
-        .send()
+        .type('json')
+        .set('ce-id', 'test-id')
+        .set('ce-type', 'test-type')
+        .set('ce-specversion', '1.0')
+        .set('ce-source', 'https://localhost')
+        .send({ bucket: 'test-bucket', name: 'test-object' })
         .expect(200)
         .expect(() =>
           assert.ok(
             console.log.calledWith(
-              'Detected change in GCS bucket: test-subject'
+              'Detected change in GCS bucket: test-bucket, object name: test-object'
             )
           )
         );
