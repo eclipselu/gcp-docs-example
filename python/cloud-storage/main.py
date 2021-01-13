@@ -37,7 +37,7 @@ def index():
         "specversion": "1.0",
         "type": "com.example.kuberun.events.received",
     }
-    data = {"message": "Hello World!"}
+    data = {"message": "Event received"}
     event = CloudEvent(attributes, data)
     headers, body = to_structured(event)
 
