@@ -23,12 +23,17 @@ import (
 	"log"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	storage "github.com/googleapis/google-cloudevents-go/cloud/storage/v1"
 )
 
 // Receive simply print the Ce-Subject header out
 func Receive(event cloudevents.Event) {
 	// do something with event.
-	fmt.Printf("Detected change in GCS bucket: %s\n", event.Subject())
+	e, err := storage.UnmarshalStorageObjectData(event.Data())
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Detected change in GCS bucket: %s, object name: %s\n", *e.Bucket, *e.Name)
 }
 
 // [END gcs_handler]
