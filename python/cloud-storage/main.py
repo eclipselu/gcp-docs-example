@@ -13,11 +13,13 @@
 # limitations under the License.
 
 # [START gcs_server]
+# import json
 import os
 import uuid
 
-from flask import Flask, request, make_response
 from cloudevents.http import CloudEvent, from_http, to_structured
+from flask import Flask, make_response, request
+from google.events.cloud.storage.v1 import StorageObjectData
 
 app = Flask(__name__)
 # [END gcs_server]
@@ -29,7 +31,10 @@ def index():
     # Gets the GCS bucket name from the CloudEvent header
     # Example: "storage.googleapis.com/projects/_/buckets/my-bucket"
     event = from_http(request.headers, request.get_data())
-    print(f"Detected change in GCS bucket: {event['subject']}")
+    storage_data = StorageObjectData.from_dict(event.data)
+    print(
+        f"Detected change in GCS bucket: {storage_data.bucket}, object: {storage_data.name}"
+    )
 
     attributes = {
         "id": str(uuid.uuid4()),

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import copy
-
+import json
 from uuid import uuid4
 
 import pytest
@@ -23,7 +23,29 @@ binary_headers = {
     "ce-id": str(uuid4),
     "ce-type": "com.pytest.sample.event",
     "ce-source": "<my-test-source>",
-    "ce-specversion": "1.0"
+    "ce-specversion": "1.0",
+    "ce-subject": "test-subject"
+}
+
+binary_data = {
+    "kind": "storage#object",
+    "id": "objectid",
+    "selfLink": "https://example.com/object.txt",
+    "name": "object.txt",
+    "bucket": "test-bucket",
+    "generation": "1610564600595212",
+    "metageneration": "1",
+    "contentType": "application/octet-stream",
+    "timeCreated": "2021-01-13T19:03:20.603Z",
+    "updated": "2021-01-13T19:03:20.603Z",
+    "storageClass": "STANDARD",
+    "timeStorageClassUpdated": "2021-01-13T19:03:20.603Z",
+    "size": "1682",
+    "md5Hash": "DqB0N1pmMRX4mjv1llfoWQ==",
+    "mediaLink": "https://example.com/download/test-bucket/o/go-test-123.txt",
+    "contentLanguage": "en",
+    "crc32c": "mA33eA==",
+    "etag": "CIyGoNfMme4CEAE="
 }
 
 
@@ -34,11 +56,8 @@ def client():
 
 
 def test_endpoint(client, capsys):
-    test_headers = copy.copy(binary_headers)
-    test_headers['Ce-Subject'] = 'test-subject'
-
-    r = client.post('/', headers=test_headers)
+    r = client.post('/', headers=binary_headers, data=json.dumps(binary_data))
     assert r.status_code == 200
 
     out, _ = capsys.readouterr()
-    assert f"Detected change in GCS bucket: {test_headers['Ce-Subject']}" in out
+    assert f"Detected change in GCS bucket: {binary_data['bucket']}, object: {binary_data['name']}" in out
